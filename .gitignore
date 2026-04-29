@@ -106,3 +106,6 @@ third_party/boost_1_82
 /trie.dot.svg
 
 **/.DS_Store
+
+*.png
+*.tex

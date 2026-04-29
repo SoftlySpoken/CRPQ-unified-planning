@@ -6,6 +6,14 @@
 #include "storage/index/tensor_store/lsh/binding_iters/forest_index_top_k.h"
 #include "storage/index/tensor_store/lsh/binding_iters/forest_index_top_all.h"
 #include "storage/index/tensor_store/lsh/binding_iters/project_tensor_similarity.h"
+#include "query/executor/binding_iter/custom_ops/union_operator.h"
+#include "query/executor/binding_iter/custom_ops/sj_operator.h"
+#include "query/executor/binding_iter/custom_ops/ti_operator.h"
+#include "query/executor/binding_iter/custom_ops/ti_two_way_operator.h"
+#include "query/executor/binding_iter/custom_ops/kc_operator.h"
+#include "query/executor/binding_iter/custom_ops/mc_operator.h"
+#include "query/executor/binding_iter/two_column_store_binding_iter.h"
+#include "query/executor/binding_iter/bplus_tree_two_column_binding_iter.h"
 #include "storage/index/tensor_store/lsh/metric.h"
 #include "storage/index/tensor_store/tensor_store.h"
 
@@ -43,6 +51,11 @@ public:
     }
 };
 
+std::string get_var_name_safe(const VarId &var_id) {
+    if (get_query_ctx().get_var_size() > var_id.id)
+        return get_query_ctx().get_var_name(var_id);
+    return std::string();
+}
 
 void BindingIterPrinter::print_join(
         const std::vector<VarId>&           parent_safe_vars,
@@ -60,7 +73,7 @@ void BindingIterPrinter::print_join(
     if (parent_safe_vars.size() > 0) {
         for (auto& var: parent_safe_vars) {
             if (first) first = false; else os << ", ";
-            os << "[?" << get_query_ctx().get_var_name(var) << "]";
+            os << "[?" << get_var_name_safe(var) << "]";
         }
     }
 
@@ -70,7 +83,7 @@ void BindingIterPrinter::print_join(
     first = true;
     for (auto& var: lhs_only_vars) {
         if (first) first = false; else os << ", ";
-        os << "?" << get_query_ctx().get_var_name(var);
+        os << "?" << get_var_name_safe(var);
     }
 
     if (!first) os << " ";
@@ -79,12 +92,12 @@ void BindingIterPrinter::print_join(
     first = true;
     for (auto& var: safe_join_vars) {
         if (first) first = false; else os << ", ";
-        os << "[?" << get_query_ctx().get_var_name(var) << "]";
+        os << "[?" << get_var_name_safe(var) << "]";
     }
 
     for (auto& var: unsafe_join_vars) {
         if (first) first = false; else os << ", ";
-        os << "?" << get_query_ctx().get_var_name(var);
+        os << "?" << get_var_name_safe(var);
     }
 
     if (!first) os << " ";
@@ -93,7 +106,7 @@ void BindingIterPrinter::print_join(
     first = true;
     for (auto& var: rhs_only_vars) {
         if (first) first = false; else os << ", ";
-        os << "?" << get_query_ctx().get_var_name(var);
+        os << "?" << get_var_name_safe(var);
     }
 
     if (!first) os << " ";
@@ -114,7 +127,7 @@ void BindingIterPrinter::visit(Aggregation& binding_iter) {
 
         for (auto var : binding_iter.group_vars) {
             if (first) first = false; else os << ", ";
-            os << '?' << get_query_ctx().get_var_name(var);
+            os << '?' << get_var_name_safe(var);
         }
     }
 
@@ -125,7 +138,7 @@ void BindingIterPrinter::visit(Aggregation& binding_iter) {
         first = true;
         for (auto& [var, agg] : binding_iter.aggregations) {
             if (first) first = false; else os << ", ";
-            os << '?' << get_query_ctx().get_var_name(var) << '=' << *agg;
+            os << '?' << get_var_name_safe(var) << '=' << *agg;
         }
     }
 
@@ -139,7 +152,7 @@ void BindingIterPrinter::visit(Bind& binding_iter) {
 
     auto printer = get_query_ctx().create_binding_expr_printer(os);
 
-    os << '?' << get_query_ctx().get_var_name(binding_iter.var) << '=';
+    os << '?' << get_var_name_safe(binding_iter.var) << '=';
     binding_iter.expr->accept_visitor(*printer);
     os << ")\n";
 
@@ -217,7 +230,7 @@ void BindingIterPrinter::visit(ExprEvaluator& binding_iter) {
     for (auto& [var, expr] : binding_iter.exprs) {
         if (first) first = false; else os << ", ";
 
-        os << '?' << get_query_ctx().get_var_name(var);
+        os << '?' << get_var_name_safe(var);
         if (expr) {
             os << '=';
             expr->accept_visitor(*printer);
@@ -298,10 +311,10 @@ void BindingIterPrinter::visit(LeapfrogJoin& binding_iter) {
     auto helper = BindingIterPrinterHelper("LeapfrogJoin", *this, binding_iter, ss.str());
 
     if (binding_iter.enumeration_level > 0) {
-        os << "?" << get_query_ctx().get_var_name(binding_iter.var_order[0]);
+        os << "?" << get_var_name_safe(binding_iter.var_order[0]);
     }
     for (int i = 1; i < binding_iter.enumeration_level; i++) {
-        os << ", ?" << get_query_ctx().get_var_name(binding_iter.var_order[i]);
+        os << ", ?" << get_var_name_safe(binding_iter.var_order[i]);
     }
 
     os << ")\n";
@@ -313,10 +326,10 @@ void BindingIterPrinter::visit(LeapfrogJoin& binding_iter) {
             range->print(os);
         }
         for (auto& var : iter->get_intersection_vars()) {
-            os << " ?" << get_query_ctx().get_var_name(var);
+            os << " ?" << get_var_name_safe(var);
         }
         for (auto& var : iter->get_enumeration_vars()) {
-            os << " ?" << get_query_ctx().get_var_name(var);
+            os << " ?" << get_var_name_safe(var);
         }
         os << ")\n";
     }
@@ -393,7 +406,7 @@ void BindingIterPrinter::visit(NoFreeVariableMinus& binding_iter) {
 
 void BindingIterPrinter::visit(ObjectEnum& binding_iter) {
     auto helper = BindingIterPrinterHelper("ObjectEnum", *this, binding_iter);
-    os << "var: " << get_query_ctx().get_var_name(binding_iter.var);
+    os << "var: " << get_var_name_safe(binding_iter.var);
     os << ", max_count: " << binding_iter.max_count;
     os << ")\n";
 
@@ -408,14 +421,14 @@ void BindingIterPrinter::visit(OrderBy& binding_iter) {
     for (size_t i = 0; i < binding_iter.order_vars.size(); i++) {
         if (first) first = false; else os << ", ";
         if (binding_iter.ascending[i]) os << "ASC " ; else os << "DESC ";
-        os << '?' << get_query_ctx().get_var_name(binding_iter.order_vars[i]);
+        os << '?' << get_var_name_safe(binding_iter.order_vars[i]);
     }
 
     os << ", saved_vars: ";
     first = true;
     for (auto [var, _] : binding_iter.saved_vars) {
         if (first) first = false; else os << ", ";
-        os << '?' << get_query_ctx().get_var_name(var);
+        os << '?' << get_var_name_safe(var);
     }
 
     os << ")\n";
@@ -461,7 +474,7 @@ void BindingIterPrinter::visit(SparqlService& binding_iter) {
     if (binding_iter.silent) os << "SILENT ";
     if (std::holds_alternative<VarId>(binding_iter.response_parser.var_or_iri)) {
         auto service_id = std::get<VarId>(binding_iter.response_parser.var_or_iri);
-        os << '?' << get_query_ctx().get_var_name(service_id);
+        os << '?' << get_var_name_safe(service_id);
     } else {
         os << '<' << std::get<std::string>(binding_iter.response_parser.var_or_iri) << '>';
     }
@@ -471,7 +484,7 @@ void BindingIterPrinter::visit(SparqlService& binding_iter) {
         auto first = true;
         for (auto var : binding_iter.scope_vars) {
             if (first) first = false; else os << ", ";
-            os << "?" << get_query_ctx().get_var_name(var);
+            os << "?" << get_var_name_safe(var);
         }
     }
 
@@ -480,7 +493,7 @@ void BindingIterPrinter::visit(SparqlService& binding_iter) {
         auto first = true;
         for (auto var : binding_iter.fixed_vars) {
             if (first) first = false; else os << ", ";
-            os << "?" << get_query_ctx().get_var_name(var);
+            os << "?" << get_var_name_safe(var);
         }
     }
 
@@ -489,7 +502,7 @@ void BindingIterPrinter::visit(SparqlService& binding_iter) {
         auto first = true;
         for (auto var : binding_iter.fixed_join_vars) {
             if (first) first = false; else os << ", ";
-            os << "?" << get_query_ctx().get_var_name(var);
+            os << "?" << get_var_name_safe(var);
         }
     }
 
@@ -525,7 +538,7 @@ void BindingIterPrinter::visit(SubSelect& binding_iter) {
         auto first = true;
         for (auto var : binding_iter.projection_vars) {
             if (first) first = false; else os << ", ";
-            os << "?" << get_query_ctx().get_var_name(var);
+            os << "?" << get_var_name_safe(var);
         }
     }
 
@@ -536,7 +549,7 @@ void BindingIterPrinter::visit(SubSelect& binding_iter) {
         auto first = true;
         for (auto var : binding_iter.safe_assigned_vars) {
             if (first) first = false; else os << ", ";
-            os << "?" << get_query_ctx().get_var_name(var);
+            os << "?" << get_var_name_safe(var);
         }
     }
 
@@ -563,7 +576,7 @@ void BindingIterPrinter::visit(Values& binding_iter) {
     for (auto& [var, fixed] : binding_iter.vars) {
         if (first) first = false; else os << ", ";
         if (fixed) os << "[";
-        os << "?" << get_query_ctx().get_var_name(var);
+        os << "?" << get_var_name_safe(var);
         if (fixed) os << "]";
     }
 
@@ -1113,8 +1126,8 @@ void BindingIterPrinter::visit(Paths::AnyTrails::DFSEnum& binding_iter) {
 
 void BindingIterPrinter::visit(LSH::ForestIndexTopK& binding_iter) {
     auto helper = BindingIterPrinterHelper("ForestIndexTopK", *this, binding_iter);
-    os << "object: ?" << get_query_ctx().get_var_name(binding_iter.object_var);
-    os << ", similarity: ?" << get_query_ctx().get_var_name(binding_iter.similarity_var);
+    os << "object: ?" << get_var_name_safe(binding_iter.object_var);
+    os << ", similarity: ?" << get_var_name_safe(binding_iter.similarity_var);
     os << ", top_k.size(): " << binding_iter.top_k.size();
     os << ")\n";
 }
@@ -1122,16 +1135,16 @@ void BindingIterPrinter::visit(LSH::ForestIndexTopK& binding_iter) {
 
 void BindingIterPrinter::visit(LSH::ForestIndexTopAll& binding_iter) {
     auto helper = BindingIterPrinterHelper("ForestIndexTopAll", *this, binding_iter);
-    os << "object: ?" << get_query_ctx().get_var_name(binding_iter.object_var);
-    os << ", similarity: ?" << get_query_ctx().get_var_name(binding_iter.similarity_var);
+    os << "object: ?" << get_var_name_safe(binding_iter.object_var);
+    os << ", similarity: ?" << get_var_name_safe(binding_iter.similarity_var);
     os << ")\n";
 }
 
 
 void BindingIterPrinter::visit(LSH::ProjectTensorSimilarity& binding_iter) {
     auto helper = BindingIterPrinterHelper("ProjectTensorSimilarity", *this, binding_iter);
-    os << "object: ?" << get_query_ctx().get_var_name(binding_iter.object_var);
-    os << ", similarity: ?" << get_query_ctx().get_var_name(binding_iter.similarity_var);
+    os << "object: ?" << get_var_name_safe(binding_iter.object_var);
+    os << ", similarity: ?" << get_var_name_safe(binding_iter.similarity_var);
     os << ", tensor_store: " << binding_iter.tensor_store.name;
     os << ", metric: ";
     switch (binding_iter.metric_type) {
@@ -1150,4 +1163,212 @@ void BindingIterPrinter::visit(LSH::ProjectTensorSimilarity& binding_iter) {
     }
     os << ")\n";
     binding_iter.child_iter->accept_visitor(*this);
+}
+
+
+void BindingIterPrinter::visit(CustomOps::UnionOperator& binding_iter) {
+    auto helper = BindingIterPrinterHelper("CustomOps::UnionOperator", *this, binding_iter);
+    os << "children: " << binding_iter.get_num_children();
+    os << ", eliminate_duplicates: " << (binding_iter.is_eliminate_duplicates() ? "true" : "false");
+    os << ", maintain_order: " << (binding_iter.is_maintain_order() ? "true" : "false");
+    os << ", use_hash_based_dedup: " << (binding_iter.is_use_hash_based_dedup() ? "true" : "false");
+    os << ", lazy: " << (binding_iter.is_lazy() ? "true" : "false");
+    os << ", has_constant_col1: " << (binding_iter.get_has_constant_col1() ? "true" : "false");
+    if (binding_iter.get_has_constant_col1()) {
+        os << ", constant_col1: " << binding_iter.get_constant_col1();
+    } else {
+        os << ", col1_var: ?" << get_var_name_safe(binding_iter.get_col1_var());
+    }
+    os << ", has_constant_col2: " << (binding_iter.get_has_constant_col2() ? "true" : "false");
+    if (binding_iter.get_has_constant_col2()) {
+        os << ", constant_col2: " << binding_iter.get_constant_col2();
+    } else {
+        os << ", col2_var: ?" << get_var_name_safe(binding_iter.get_col2_var());
+    }
+    os << ")\n";
+
+    // Print children with detailed information
+    for (size_t i = 0; i < binding_iter.get_num_children(); ++i) {
+        os << std::string(indent + 2, ' ') << "child[" << i << "]: ";
+        if (auto* child = binding_iter.get_child(i)) {
+            child->accept_visitor(*this);
+        } else {
+            os << "null\n";
+        }
+    }
+}
+
+void BindingIterPrinter::visit(CustomOps::SJOperator& binding_iter) {
+    auto helper = BindingIterPrinterHelper("CustomOps::SJOperator", *this, binding_iter);
+    // Print left variables
+    os << "left_vars: [";
+    const auto& left_vars = binding_iter.get_left_vars();
+    for (size_t i = 0; i < left_vars.size(); ++i) {
+        if (i > 0) os << ", ";
+        os << "?" << get_var_name_safe(left_vars[i]);
+    }
+    os << "]";
+
+    // Print right variables
+    os << ", right_vars: [";
+    const auto& right_vars = binding_iter.get_right_vars();
+    for (size_t i = 0; i < right_vars.size(); ++i) {
+        if (i > 0) os << ", ";
+        os << "?" << get_var_name_safe(right_vars[i]);
+    }
+    os << "]";
+
+    // Print join variables
+    os << ", join_vars: [";
+    const auto& join_vars = binding_iter.get_join_vars();
+    for (size_t i = 0; i < join_vars.size(); ++i) {
+        if (i > 0) os << ", ";
+        os << "?" << get_var_name_safe(join_vars[i]);
+    }
+    os << "]";
+
+    os << ", hash_table_built: " << (binding_iter.is_hash_table_built() ? "true" : "false");
+    os << ", hash_table_size: " << binding_iter.get_hash_table_size();
+    os << ", in_enumeration: " << (binding_iter.is_in_enumeration_state() ? "true" : "false");
+    os << ")\n";
+
+    // Print children with detailed information
+    os << std::string(indent + 2, ' ') << "left_child: ";
+    binding_iter.get_left_child()->accept_visitor(*this);
+    os << std::string(indent + 2, ' ') << "right_child: ";
+    binding_iter.get_right_child()->accept_visitor(*this);
+}
+
+void BindingIterPrinter::visit(CustomOps::TIOperator& binding_iter) {
+    auto helper = BindingIterPrinterHelper("CustomOps::TIOperator", *this, binding_iter);
+    os << "num_edge_path_operands: " << binding_iter.get_num_edge_path_operands();
+    os << ", intersect_in_leftmost: " << (binding_iter.has_intersection_in_leftmost() ? "true" : "false");
+    os << ", intersection_complete: " << (binding_iter.is_intersection_complete() ? "true" : "false");
+    os << ", neighbor_lists_count: " << binding_iter.get_neighbor_lists_count();
+    os << ", has_leftmost_constant_col1: " << (binding_iter.has_leftmost_constant_col1() ? "true" : "false");
+    if (binding_iter.has_leftmost_constant_col1()) {
+        os << ", leftmost_constant_col1: " << binding_iter.get_leftmost_constant_col1();
+    }
+    os << ")\n";
+    
+    os << std::string(indent + 2, ' ') << "leftmost_operand: ";
+    binding_iter.get_leftmost_operand()->accept_visitor(*this);
+    os << std::string(indent + 2, ' ') << "edge_path_operands: ";
+    size_t num_edge_path_operands = binding_iter.get_num_edge_path_operands();
+    for (size_t i = 0; i < num_edge_path_operands; i++)
+    binding_iter.get_edge_path_operand(i)->accept_visitor(*this);
+}
+
+void BindingIterPrinter::visit(CustomOps::TITwoWayOperator& binding_iter) {
+    auto helper = BindingIterPrinterHelper("CustomOps::TITwoWayOperator", *this, binding_iter);
+    os << "common_var: ?" << get_var_name_safe(binding_iter.get_common_var());
+    os << ", has_current_leftmost_row: " << (binding_iter.get_has_current_leftmost_row() ? "true" : "false");
+    os << ", has_current_neighbor: " << (binding_iter.get_has_current_neighbor() ? "true" : "false");
+    os << ", result_store_size: " << binding_iter.get_result_store_size();
+    os << ", has_constant_col1: " << (binding_iter.get_has_constant_col1() ? "true" : "false");
+    if (binding_iter.get_has_constant_col1()) {
+        os << ", constant_col1: " << binding_iter.get_constant_col1();
+    }
+    os << ", has_constant_col2: " << (binding_iter.get_has_constant_col2() ? "true" : "false");
+    if (binding_iter.get_has_constant_col2()) {
+        os << ", constant_col2: " << binding_iter.get_constant_col2();
+    }
+    os << ")\n";
+
+    os << std::string(indent + 2, ' ') << "leftmost_operand: ";
+    if (auto* leftmost = binding_iter.get_leftmost_operand()) {
+        leftmost->accept_visitor(*this);
+    } else {
+        os << "null\n";
+    }
+
+    os << std::string(indent + 2, ' ') << "edge_path_operand: ";
+    if (auto* edge_path = binding_iter.get_edge_path_operand()) {
+        edge_path->accept_visitor(*this);
+    } else {
+        os << "null\n";
+    }
+}
+
+void BindingIterPrinter::visit(CustomOps::KCOperator& binding_iter) {
+    auto helper = BindingIterPrinterHelper("CustomOps::KCOperator", *this, binding_iter);
+    os << "iterations_count: " << binding_iter.get_iterations_count();
+    os << ", total_edges: " << binding_iter.get_total_edges();
+    os << ", fix_point_reached: " << (binding_iter.has_reached_fix_point() ? "true" : "false");
+    os << ", has_constant_col1: " << (binding_iter.get_has_constant_col1() ? "true" : "false");
+    if (binding_iter.get_has_constant_col1()) {
+        os << ", constant_col1: " << binding_iter.get_constant_col1();
+    }
+    os << ", has_constant_col2: " << (binding_iter.get_has_constant_col2() ? "true" : "false");
+    if (binding_iter.get_has_constant_col2()) {
+        os << ", constant_col2: " << binding_iter.get_constant_col2();
+    }
+    os << ")\n";
+    
+    os << std::string(indent + 2, ' ') << "child: ";
+    binding_iter.get_child()->accept_visitor(*this);
+}
+
+void BindingIterPrinter::visit(CustomOps::MCOperator& binding_iter) {
+    auto helper = BindingIterPrinterHelper("CustomOps::MCOperator", *this, binding_iter);
+    os << "current_phase: " << binding_iter.get_phase_name();
+    os << ", seen_pairs_count: " << binding_iter.get_seen_pairs_count();
+    os << ", expansion_changed: " << (binding_iter.is_expansion_changed() ? "true" : "false");
+    os << ", left_epsilon: " << (binding_iter.has_left_epsilon() ? "true" : "false");
+    os << ", right_epsilon: " << (binding_iter.has_right_epsilon() ? "true" : "false");
+    os << ", current_phase_size: " << binding_iter.get_current_phase_size();
+    os << ")\n";
+}
+
+void BindingIterPrinter::visit(CustomOps::TwoColumnStoreBindingIter& binding_iter) {
+    auto helper = BindingIterPrinterHelper("CustomOps::TwoColumnStoreBindingIter", *this, binding_iter);
+    if (binding_iter.get_has_constant_col1())
+    os << "col1_constant: " << binding_iter.get_constant_col1();
+    else
+    os << "col1_var: ?" << get_var_name_safe(binding_iter.get_col1_var());
+    if (binding_iter.get_has_constant_col2()) {
+        os << ", col2_constant: " << binding_iter.get_constant_col2();
+    } else {
+        os << ", col2_var: ?" << get_var_name_safe(binding_iter.get_col2_var());
+    }
+    os << ")\n";
+}
+
+void BindingIterPrinter::visit(BPlusTreeTwoColumnBindingIter<3>& binding_iter) {
+    auto helper = BindingIterPrinterHelper("BPlusTreeTwoColumnBindingIter<3>", *this, binding_iter);
+
+    // Print index type (PSO or POS)
+    os << "index_type: " << binding_iter.get_index_type_name();
+
+    // Print predicate information
+    os << ", predicate: " << binding_iter.get_fixed_predicate();
+
+    // Print column information (similar to TwoColumnStoreBindingIter)
+    if (binding_iter.get_has_constant_col1()) {
+        os << ", col1_constant: " << binding_iter.get_constant_col1();
+    } else {
+        os << ", col1_var: ?";
+        os << get_var_name_safe(binding_iter.get_col1_var());
+    }
+    if (binding_iter.get_has_constant_col2()) {
+        os << ", col2_constant: " << binding_iter.get_constant_col2();
+    } else {
+        os << ", col2_var: ?";
+        os << get_var_name_safe(binding_iter.get_col2_var());
+    }
+    os << ")\n";
+}
+
+void BindingIterPrinter::visit(TwoColumnBindingIter& binding_iter) {
+    if (auto *p_union_operator = dynamic_cast<CustomOps::UnionOperator *>(&binding_iter)) {
+        visit(*p_union_operator);
+    } else if (auto *p_mc_operator = dynamic_cast<CustomOps::MCOperator *>(&binding_iter)) {
+        visit(*p_mc_operator);
+    } else if (auto *p_kc_operator = dynamic_cast<CustomOps::KCOperator *>(&binding_iter)) {
+        visit(*p_kc_operator);
+    } else if (auto *p_titwoway_operator = dynamic_cast<CustomOps::TITwoWayOperator *>(&binding_iter)) {
+        visit(*p_titwoway_operator);
+    } else if (auto *p_bpt_operator = dynamic_cast<BPlusTreeTwoColumnBindingIter<3> *>(&binding_iter)) {
+        visit(*p_bpt_operator);
+    }
 }

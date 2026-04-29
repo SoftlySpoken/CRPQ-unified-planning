@@ -1,0 +1,125 @@
+@prefix : <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Person data for testing joins and patterns
+:person1 :name "Alice" ;
+         :age 25 ;
+         :city :city1 ;
+         :worksFor :company1 ;
+         :knows :person2, :person3 .
+
+:person2 :name "Bob" ;
+         :age 30 ;
+         :city :city2 ;
+         :worksFor :company1 ;
+         :knows :person1, :person3, :person4 .
+
+:person3 :name "Charlie" ;
+         :age 35 ;
+         :city :city1 ;
+         :worksFor :company2 ;
+         :knows :person1, :person2 .
+
+:person4 :name "David" ;
+         :age 28 ;
+         :city :city3 ;
+         :worksFor :company2 ;
+         :knows :person2 .
+
+:person5 :name "Eve" ;
+         :age 32 ;
+         :city :city2 ;
+         :worksFor :company3 .
+
+# Company data
+:company1 :companyName "TechCorp" ;
+          :industry "Technology" ;
+          :location :city1 ;
+          :employees 1000 .
+
+:company2 :companyName "DataSoft" ;
+          :industry "Software" ;
+          :location :city2 ;
+          :employees 500 .
+
+:company3 :companyName "WebSystems" ;
+          :industry "Technology" ;
+          :location :city3 ;
+          :employees 200 .
+
+# City data
+:city1 :cityName "New York" ;
+       :population 8000000 ;
+       :country "USA" .
+
+:city2 :cityName "San Francisco" ;
+       :population 900000 ;
+       :country "USA" .
+
+:city3 :cityName "Austin" ;
+       :population 950000 ;
+       :country "USA" .
+
+# Product data for complex joins
+:product1 :productName "Laptop" ;
+          :price 1200 ;
+          :category :electronics ;
+          :manufacturer :company1 .
+
+:product2 :productName "Phone" ;
+          :price 800 ;
+          :category :electronics ;
+          :manufacturer :company2 .
+
+:product3 :productName "Tablet" ;
+          :price 600 ;
+          :category :electronics ;
+          :manufacturer :company1 .
+
+:product4 :productName "Software License" ;
+          :price 200 ;
+          :category :software ;
+          :manufacturer :company2 .
+
+# Category data
+:electronics :categoryName "Electronics" ;
+            :description "Electronic devices and gadgets" .
+
+:software :categoryName "Software" ;
+         :description "Software products and licenses" .
+
+# Order data for chain patterns
+:order1 :customer :person1 ;
+        :product :product1 ;
+        :quantity 1 ;
+        :orderDate "2024-01-15"^^xsd:date .
+
+:order2 :customer :person2 ;
+        :product :product2 ;
+        :quantity 2 ;
+        :orderDate "2024-01-20"^^xsd:date .
+
+:order3 :customer :person1 ;
+        :product :product3 ;
+        :quantity 1 ;
+        :orderDate "2024-02-01"^^xsd:date .
+
+:order4 :customer :person3 ;
+        :product :product4 ;
+        :quantity 3 ;
+        :orderDate "2024-02-15"^^xsd:date .
+
+# Additional data for performance testing (larger dataset)
+:person6 :name "Frank" ; :age 45 ; :city :city1 ; :worksFor :company1 .
+:person7 :name "Grace" ; :age 29 ; :city :city2 ; :worksFor :company2 .
+:person8 :name "Henry" ; :age 33 ; :city :city3 ; :worksFor :company3 .
+:person9 :name "Ivy" ; :age 27 ; :city :city1 ; :worksFor :company1 .
+:person10 :name "Jack" ; :age 31 ; :city :city2 ; :worksFor :company2 .
+
+# More products for join testing
+:product5 :productName "Monitor" ; :price 300 ; :category :electronics ; :manufacturer :company3 .
+:product6 :productName "Keyboard" ; :price 100 ; :category :electronics ; :manufacturer :company1 .
+:product7 :productName "Mouse" ; :price 50 ; :category :electronics ; :manufacturer :company2 .
+:product8 :productName "Database Software" ; :price 500 ; :category :software ; :manufacturer :company3 .

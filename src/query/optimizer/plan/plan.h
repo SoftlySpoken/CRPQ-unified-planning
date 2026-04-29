@@ -53,8 +53,13 @@ public:
         }
         return true;
     }
+    void set_lazy(bool _lazy) { lazy = _lazy; }
+    void set_epsilon(bool _epsilon) { epsilon = _epsilon; }
+    bool get_epsilon() { return epsilon; }
 
 protected:
+    bool lazy = false;
+    bool epsilon = false;
     void set_input_var(const std::set<VarId>& input_vars, Id id, bool* assigned) {
         if (id.is_var()) {
             auto var_id = id.get_var();

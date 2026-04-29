@@ -45,8 +45,13 @@ endif(APPLE)
 
 # Define the compiler flags
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -pthread -march=native -funroll-loops -fno-operator-names")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g3 -fsanitize=undefined,address -fno-omit-frame-pointer")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -g0")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g3 -fno-omit-frame-pointer")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -g3 -fno-omit-frame-pointer")
+
+# Define SANITIZE build type for AddressSanitizer and UndefinedBehaviorSanitizer
+set(CMAKE_CXX_FLAGS_SANITIZE "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address,undefined -fno-sanitize-recover=all -fstack-protector-strong")
+set(CMAKE_EXE_LINKER_FLAGS_SANITIZE "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address,undefined")
+set(CMAKE_SHARED_LINKER_FLAGS_SANITIZE "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=address,undefined")
 
 if(PROFILE)
     add_definitions(-DBOOST_STACKTRACE_USE_ADDR2LINE)
@@ -72,15 +77,15 @@ endif(OpenMP_CXX_FOUND)
 
 # Enable interprocedural optimization if supported and BUILD_TYPE is RELEASE
 string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
-if(BUILD_TYPE STREQUAL "RELEASE")
-    include(CheckIPOSupported)
-    check_ipo_supported(RESULT ipo_result OUTPUT ipo_output)
-    if(ipo_result)
-        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-    else()
-        message(WARNING "IPO is not supported:\n${ipo_output}")
-    endif(ipo_result)
-endif(BUILD_TYPE STREQUAL "RELEASE")
+# if(BUILD_TYPE STREQUAL "RELEASE")
+#     include(CheckIPOSupported)
+#     check_ipo_supported(RESULT ipo_result OUTPUT ipo_output)
+#     if(ipo_result)
+#         set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+#     else()
+#         message(WARNING "IPO is not supported:\n${ipo_output}")
+#     endif(ipo_result)
+# endif(BUILD_TYPE STREQUAL "RELEASE")
 
 # Add include directories
 include_directories(${CMAKE_SOURCE_DIR}/src)
@@ -98,7 +103,7 @@ message(STATUS "Build MillenniumDB's binaries")
 # Third party dependencies
 add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime-4.13.1)
 include_directories(${CMAKE_SOURCE_DIR}/third_party/antlr4-runtime-4.13.1/src)
-include_directories(${CMAKE_SOURCE_DIR}/third_party/boost_1_82/include)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/boost_1_81/include)
 # Define targets
 add_library(millenniumdb STATIC ${SRCS})
 target_compile_definitions(millenniumdb PUBLIC SERD_STATIC)
@@ -126,6 +131,17 @@ set(TEST_TARGETS
     regular_path_expr_to_rpq_dfa
     scsu-test
     variable_set
+    union_operator-test
+    sj_operator-test
+    ti_operator-test
+    ti_two_way_operator-test
+    kc_operator-test
+    mc_operator-test
+    two_column_store-test
+    bplus_tree_two_column_binding_iter-test
+    custom_ops_bplus_tree_integration-test
+    custom_planner-test
+    constant_col2_features-test
 )
 # Build targets
 foreach(target ${BUILD_TARGETS})

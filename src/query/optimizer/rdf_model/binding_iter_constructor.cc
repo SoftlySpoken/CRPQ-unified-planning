@@ -12,6 +12,10 @@
 #include "query/executor/binding_iters.h"
 #include "query/optimizer/plan/join_order/greedy_optimizer.h"
 #include "query/optimizer/plan/join_order/leapfrog_optimizer.h"
+#include "query/optimizer/planner_config.h"
+#include "query/optimizer/planner_interface.h"
+#include "query/optimizer/planner_metrics.h"
+#include "query/optimizer/planner_metrics_reporter.h"
 #include "query/optimizer/rdf_model/expr_to_binding_expr.h"
 #include "query/optimizer/rdf_model/plan/path_plan.h"
 #include "query/optimizer/rdf_model/plan/triple_plan.h"
@@ -408,19 +412,106 @@ void BindingIterConstructor::visit(OpBasicGraphPattern& op_basic_graph_pattern) 
         // plan->print(std::cout, 0);
     }
 
-    // try to use leapfrog if there is a join
-    if (base_plans.size() > 1) {
-        if (safe_assigned_vars.size() > 0) {
-            tmp = LeapfrogOptimizer::try_get_iter_with_assigned(base_plans, binding_size);
-        } else {
-            tmp = LeapfrogOptimizer::try_get_iter_without_assigned(base_plans, binding_size);
+    const auto& config = PlannerConfig::get_instance();
+
+    // Use planner interface for query planning
+    if (config.should_use_custom_planner() || config.should_compare_planners()) {
+        // Initialize metrics collection
+        auto& metrics_collector = PlannerMetricsCollector::get_instance();
+        metrics_collector.set_enabled(config.should_compare_planners() || config.is_verbose());
+        metrics_collector.start_query();
+
+        std::unique_ptr<Plan> selected_plan = nullptr;
+
+        if (config.should_compare_planners()) {
+            // Run both planners for comparison
+            PlannerMetrics original_metrics, custom_metrics;
+
+            try {
+                // Try original planner
+                auto original_planner = PlannerFactory::create_planner(PlannerFactory::PlannerType::ORIGINAL);
+                auto original_plan = original_planner->create_plan(
+                    op_basic_graph_pattern, base_plans, safe_assigned_vars, binding_size, &original_metrics);
+
+                if (original_plan) {
+                    metrics_collector.add_metrics(original_metrics);
+                    selected_plan = std::move(original_plan);
+                }
+            } catch (const std::exception& e) {
+                original_metrics.set_error(std::string("Original planner failed: ") + e.what());
+                metrics_collector.add_metrics(original_metrics);
+                if (config.is_verbose()) {
+                    std::cerr << "Original planner failed: " << e.what() << std::endl;
+                }
+            }
+
+            try {
+                // Try custom planner
+                auto custom_planner = PlannerFactory::create_planner(PlannerFactory::PlannerType::CUSTOM);
+                auto custom_plan = custom_planner->create_plan(
+                    op_basic_graph_pattern, base_plans, safe_assigned_vars, binding_size, &custom_metrics);
+
+                if (custom_plan) {
+                    metrics_collector.add_metrics(custom_metrics);
+                    // Use custom plan if available and original failed, or if configured to prefer custom
+                    if (!selected_plan || config.custom_planner_enabled) {
+                        selected_plan = std::move(custom_plan);
+                    }
+                }
+            } catch (const std::exception& e) {
+                custom_metrics.set_error(std::string("Custom planner failed: ") + e.what());
+                metrics_collector.add_metrics(custom_metrics);
+                if (config.is_verbose()) {
+                    std::cerr << "Custom planner failed: " << e.what() << std::endl;
+                }
+            }
+
+            // Print comparison if verbose
+            if (config.is_verbose()) {
+                PlannerMetricsReporter::print_comparison(metrics_collector.get_metrics());
+            }
+
+        } else if (config.custom_planner_enabled) {
+            // Use custom planner only
+            PlannerMetrics custom_metrics;
+            try {
+                auto custom_planner = PlannerFactory::create_planner(PlannerFactory::PlannerType::CUSTOM);
+                selected_plan = custom_planner->create_plan(
+                    op_basic_graph_pattern, base_plans, safe_assigned_vars, binding_size, &custom_metrics);
+
+                if (config.is_verbose()) {
+                    metrics_collector.add_metrics(custom_metrics);
+                }
+            } catch (const std::exception& e) {
+                if (config.is_verbose()) {
+                    std::cerr << "Custom planner failed, falling back to original: " << e.what() << std::endl;
+                }
+                // Fall back to original planner
+                selected_plan = nullptr;
+            }
+        }
+
+        if (selected_plan) {
+            tmp = selected_plan->get_binding_iter();
         }
     }
 
+    // Fall back to original logic if no planner was selected or custom planning is disabled
     if (tmp == nullptr) {
-        std::unique_ptr<Plan> root_plan = nullptr;
-        root_plan = GreedyOptimizer::get_plan(base_plans);
-        tmp = root_plan->get_binding_iter();
+        // try to use leapfrog if there is a join
+        if (base_plans.size() > 1) {
+            if (safe_assigned_vars.size() > 0) {
+                tmp = LeapfrogOptimizer::try_get_iter_with_assigned(base_plans, binding_size);
+            } else {
+                tmp = LeapfrogOptimizer::try_get_iter_without_assigned(base_plans, binding_size);
+            }
+        }
+
+        if (tmp == nullptr) {
+            std::unique_ptr<Plan> root_plan = nullptr;
+            root_plan = GreedyOptimizer::get_plan(base_plans);
+            tmp = root_plan->get_binding_iter();
+        }
     }
 
     // Insert new assigned_vars

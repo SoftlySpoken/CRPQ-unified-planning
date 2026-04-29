@@ -1,0 +1,121 @@
+{
+  "head": {
+    "vars": ["customerName", "productName", "manufacturerName"]
+  },
+  "results": {
+    "bindings": [
+      {
+        "customerName": {
+          "type": "literal",
+          "value": "Alice"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Laptop"
+        },
+        "manufacturerName": {
+          "type": "literal",
+          "value": "TechCorp"
+        }
+      },
+      {
+        "customerName": {
+          "type": "literal",
+          "value": "Bob"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Phone"
+        },
+        "manufacturerName": {
+          "type": "literal",
+          "value": "DataSoft"
+        }
+      },
+      {
+        "customerName": {
+          "type": "literal",
+          "value": "Alice"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Tablet"
+        },
+        "manufacturerName": {
+          "type": "literal",
+          "value": "TechCorp"
+        }
+      },
+      {
+        "customerName": {
+          "type": "literal",
+          "value": "Charlie"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Software License"
+        },
+        "manufacturerName": {
+          "type": "literal",
+          "value": "DataSoft"
+        }
+      },
+      {
+        "customerName": {
+          "type": "literal",
+          "value": "David"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Monitor"
+        },
+        "manufacturerName": {
+          "type": "literal",
+          "value": "WebSystems"
+        }
+      },
+      {
+        "customerName": {
+          "type": "literal",
+          "value": "Eve"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Keyboard"
+        },
+        "manufacturerName": {
+          "type": "literal",
+          "value": "TechCorp"
+        }
+      },
+      {
+        "customerName": {
+          "type": "literal",
+          "value": "Frank"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Mouse"
+        },
+        "manufacturerName": {
+          "type": "literal",
+          "value": "DataSoft"
+        }
+      },
+      {
+        "customerName": {
+          "type": "literal",
+          "value": "Grace"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Database Software"
+        },
+        "manufacturerName": {
+          "type": "literal",
+          "value": "WebSystems"
+        }
+      }
+    ]
+  }
+}

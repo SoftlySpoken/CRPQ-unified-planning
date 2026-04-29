@@ -9,6 +9,7 @@
 #include "misc/logger.h"
 #include "network/server/protocol.h"
 #include "network/server/server.h"
+#include "query/optimizer/planner_config.h"
 #include "storage/buffer_manager.h"
 #include "storage/filesystem.h"
 #include "storage/index/tensor_store/lsh/forest_index.h"
@@ -53,6 +54,12 @@ int main(int argc, char* argv[]) {
     uint64_t unversioned_pages_buffer = BufferManager::DEFAULT_UNVERSIONED_PAGES_BUFFER_SIZE;
     uint64_t tensor_pages_buffer      = TensorBufferManager::DEFAULT_TENSOR_PAGES_BUFFER_SIZE;
     bool     preload_tensors          = false;
+
+    // Custom planner configuration
+    bool custom_planner_enabled    = false;
+    bool custom_planner_compare    = false;
+    bool custom_planner_verbose    = false;
+    std::string custom_planner_output_file;
 
     std::string db_directory;
     std::string config_path;
@@ -143,6 +150,20 @@ int main(int argc, char* argv[]) {
 
     app.add_flag("--no-browser", no_browser)->description("Disable browser interface");
 
+    // Custom planner options
+    app.add_flag("--custom-planner", custom_planner_enabled)
+      ->description("Enable custom planner for SPARQL queries");
+
+    app.add_flag("--custom-planner-compare", custom_planner_compare)
+      ->description("Run both original and custom planners for comparison");
+
+    app.add_flag("--custom-planner-verbose", custom_planner_verbose)
+      ->description("Enable verbose output for custom planner operations");
+
+    app.add_option("--custom-planner-output", custom_planner_output_file)
+      ->description("Output file for custom planner comparison metrics")
+      ->type_name("<file>");
+
     CLI11_PARSE(app, argc, argv);
 
     if (!config_path.empty()) {
@@ -186,6 +207,10 @@ int main(int argc, char* argv[]) {
                 quad_model.path_mode = path_mode == "dfs" ? PathMode::DFS : PathMode::BFS;
             }
 
+            // Configure custom planner
+            PlannerConfig::configure(custom_planner_enabled, custom_planner_compare,
+                                   custom_planner_verbose, custom_planner_output_file);
+
             quad_model.catalog().print(std::cout);
 
             TensorStore::load_tensor_stores(tensor_pages_buffer, preload_tensors);
@@ -211,6 +236,10 @@ int main(int argc, char* argv[]) {
             if (!path_mode.empty()) {
                 rdf_model.path_mode = path_mode == "dfs" ? PathMode::DFS : PathMode::BFS;
             }
+
+            // Configure custom planner
+            PlannerConfig::configure(custom_planner_enabled, custom_planner_compare,
+                                   custom_planner_verbose, custom_planner_output_file);
 
             rdf_model.catalog().print(std::cout);
 

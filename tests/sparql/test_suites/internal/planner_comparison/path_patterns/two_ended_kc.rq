@@ -1,0 +1,5 @@
+PREFIX : <http://example.org/>
+
+SELECT ?person1 ?person2 WHERE {
+    ?person1 :knows+ ?person2 .
+}

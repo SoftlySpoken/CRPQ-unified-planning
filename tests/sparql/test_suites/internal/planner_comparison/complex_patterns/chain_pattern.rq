@@ -1,0 +1,10 @@
+PREFIX : <http://example.org/>
+
+SELECT ?customerName ?productName ?manufacturerName WHERE {
+    ?order :customer ?customer ;
+           :product ?product .
+    ?customer :name ?customerName .
+    ?product :productName ?productName ;
+             :manufacturer ?manufacturer .
+    ?manufacturer :companyName ?manufacturerName .
+}

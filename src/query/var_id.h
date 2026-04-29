@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <functional>
 
 class VarId {
 public:
@@ -27,3 +28,13 @@ public:
 };
 
 static_assert(std::is_trivially_copyable<VarId>::value);
+
+// Hash function specialization for VarId
+namespace std {
+    template <>
+    struct hash<VarId> {
+        std::size_t operator()(const VarId& var) const noexcept {
+            return std::hash<uint_fast32_t>{}(var.id);
+        }
+    };
+}

@@ -1,0 +1,9 @@
+PREFIX : <http://example.org/>
+
+SELECT ?personName ?companyName ?cityName WHERE {
+    ?person :name ?personName ;
+            :worksFor ?company ;
+            :city ?city .
+    ?company :companyName ?companyName .
+    ?city :cityName ?cityName .
+}

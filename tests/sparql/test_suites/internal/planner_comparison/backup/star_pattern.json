@@ -1,0 +1,124 @@
+{
+  "head": {
+    "vars": ["person", "name", "age", "city", "company"]
+  },
+  "results": {
+    "bindings": [
+      {
+        "person": {
+          "type": "uri",
+          "value": "http://example.org/person3"
+        },
+        "name": {
+          "type": "literal",
+          "value": "Charlie"
+        },
+        "age": {
+          "type": "literal",
+          "value": "35",
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+        },
+        "city": {
+          "type": "uri",
+          "value": "http://example.org/city1"
+        },
+        "company": {
+          "type": "uri",
+          "value": "http://example.org/company2"
+        }
+      },
+      {
+        "person": {
+          "type": "uri",
+          "value": "http://example.org/person5"
+        },
+        "name": {
+          "type": "literal",
+          "value": "Eve"
+        },
+        "age": {
+          "type": "literal",
+          "value": "32",
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+        },
+        "city": {
+          "type": "uri",
+          "value": "http://example.org/city2"
+        },
+        "company": {
+          "type": "uri",
+          "value": "http://example.org/company3"
+        }
+      },
+      {
+        "person": {
+          "type": "uri",
+          "value": "http://example.org/person6"
+        },
+        "name": {
+          "type": "literal",
+          "value": "Frank"
+        },
+        "age": {
+          "type": "literal",
+          "value": "45",
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+        },
+        "city": {
+          "type": "uri",
+          "value": "http://example.org/city1"
+        },
+        "company": {
+          "type": "uri",
+          "value": "http://example.org/company1"
+        }
+      },
+      {
+        "person": {
+          "type": "uri",
+          "value": "http://example.org/person8"
+        },
+        "name": {
+          "type": "literal",
+          "value": "Henry"
+        },
+        "age": {
+          "type": "literal",
+          "value": "33",
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+        },
+        "city": {
+          "type": "uri",
+          "value": "http://example.org/city3"
+        },
+        "company": {
+          "type": "uri",
+          "value": "http://example.org/company3"
+        }
+      },
+      {
+        "person": {
+          "type": "uri",
+          "value": "http://example.org/person10"
+        },
+        "name": {
+          "type": "literal",
+          "value": "Jack"
+        },
+        "age": {
+          "type": "literal",
+          "value": "31",
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+        },
+        "city": {
+          "type": "uri",
+          "value": "http://example.org/city2"
+        },
+        "company": {
+          "type": "uri",
+          "value": "http://example.org/company2"
+        }
+      }
+    ]
+  }
+}

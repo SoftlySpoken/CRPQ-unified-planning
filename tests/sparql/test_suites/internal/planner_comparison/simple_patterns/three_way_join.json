@@ -1,0 +1,149 @@
+{
+  "head": {
+    "vars": ["personName", "companyName", "cityName"]
+  },
+  "results": {
+    "bindings": [
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Alice"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "TechCorp"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "New York"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Bob"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "TechCorp"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "San Francisco"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Charlie"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "DataSoft"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "New York"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "David"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "DataSoft"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "Austin"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Eve"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "WebSystems"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "San Francisco"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Frank"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "TechCorp"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "New York"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Grace"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "DataSoft"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "San Francisco"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Henry"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "WebSystems"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "Austin"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Ivy"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "TechCorp"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "New York"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Jack"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "DataSoft"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "San Francisco"
+        }
+      }
+    ]
+  }
+}

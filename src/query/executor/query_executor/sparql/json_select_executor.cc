@@ -23,6 +23,12 @@ uint64_t JsonSelectExecutor::execute_empty_binding(std::ostream& os) {
         result_count++;
         os << ",{}";
     }
+    if (root->get_epsilon()) {
+        while (root->epsilon_next()) {
+            result_count++;
+            os << ",{}";
+        }
+    }
     os << "]}}";
     return result_count;
 }
@@ -65,6 +71,25 @@ uint64_t JsonSelectExecutor::execute(std::ostream& os) {
         os << "}";
         sep1 = ",";
     }
+    
+    if (root->get_epsilon()) {
+        while (root->epsilon_next()) {
+            result_count++;
+            os << sep1 << "{";
+            auto sep2 = "\0"; // first time is empty, then will be a comma
+            for (auto it = projection_vars.cbegin(); it != projection_vars.cend(); ++it) {
+                auto value = (*binding)[*it];
+                if (!value.is_null()) {
+                    os << sep2 << "\"" << get_query_ctx().get_var_name(*it) << "\":";
+                    print(os, escaped_os, value);
+                    sep2 = ",";
+                }
+            }
+            os << "}";
+            sep1 = ",";
+        }
+    }
+
     os << "]}}";
     return result_count;
 }

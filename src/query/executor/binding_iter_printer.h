@@ -131,4 +131,14 @@ public:
     virtual void visit(LSH::ForestIndexTopK&)   override;
     virtual void visit(LSH::ForestIndexTopAll&) override;
     virtual void visit(LSH::ProjectTensorSimilarity&) override;
+
+    virtual void visit(CustomOps::UnionOperator&) override;
+    virtual void visit(CustomOps::SJOperator&) override;
+    virtual void visit(CustomOps::TIOperator&) override;
+    virtual void visit(CustomOps::TITwoWayOperator&) override;
+    virtual void visit(CustomOps::KCOperator&) override;
+    virtual void visit(CustomOps::MCOperator&) override;
+    virtual void visit(CustomOps::TwoColumnStoreBindingIter&) override;
+    virtual void visit(TwoColumnBindingIter&) override;
+    virtual void visit(BPlusTreeTwoColumnBindingIter<3>&) override;
 };

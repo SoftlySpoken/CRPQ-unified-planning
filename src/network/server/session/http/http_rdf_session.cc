@@ -9,6 +9,7 @@
 #include "network/sparql/request_handler.h"
 #include "query/executor/query_executor/query_executor.h"
 #include "query/optimizer/rdf_model/executor_constructor.h"
+#include "query/optimizer/planner_metrics.h"
 #include "query/parser/grammar/error_listener.h"
 #include "query/parser/sparql_query_parser.h"
 #include "query/parser/sparql_update_parser.h"
@@ -206,6 +207,18 @@ void HttpRdfSession::execute_readonly_query_plan(QueryExecutor&       physical_p
 
         const auto result_count  = physical_plan.execute(os);
         execution_duration = std::chrono::system_clock::now() - execution_start;
+
+        // Update metrics with execution results
+        auto& metrics_collector = PlannerMetricsCollector::get_instance();
+        if (metrics_collector.is_enabled()) {
+            auto metrics_list = metrics_collector.get_metrics();
+            for (auto& metrics : const_cast<std::vector<PlannerMetrics>&>(metrics_list)) {
+                if (!metrics.had_error && metrics.result_count == 0) {
+                    metrics.result_count = result_count;
+                    metrics.execution_time_ms = std::chrono::duration<double, std::milli>(execution_duration).count();
+                }
+            }
+        }
 
         logger.log(Category::ExecutionStats, [&physical_plan](std::ostream& os) {
             physical_plan.analyze(os, true);

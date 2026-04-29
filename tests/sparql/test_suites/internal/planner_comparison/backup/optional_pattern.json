@@ -1,0 +1,149 @@
+{
+  "head": {
+    "vars": ["personName", "companyName", "industryName"]
+  },
+  "results": {
+    "bindings": [
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Alice"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "TechCorp"
+        },
+        "industryName": {
+          "type": "literal",
+          "value": "Technology"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Bob"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "TechCorp"
+        },
+        "industryName": {
+          "type": "literal",
+          "value": "Technology"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Charlie"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "DataSoft"
+        },
+        "industryName": {
+          "type": "literal",
+          "value": "Software"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "David"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "DataSoft"
+        },
+        "industryName": {
+          "type": "literal",
+          "value": "Software"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Eve"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "WebSystems"
+        },
+        "industryName": {
+          "type": "literal",
+          "value": "Technology"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Frank"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "TechCorp"
+        },
+        "industryName": {
+          "type": "literal",
+          "value": "Technology"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Grace"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "DataSoft"
+        },
+        "industryName": {
+          "type": "literal",
+          "value": "Software"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Henry"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "WebSystems"
+        },
+        "industryName": {
+          "type": "literal",
+          "value": "Technology"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Ivy"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "TechCorp"
+        },
+        "industryName": {
+          "type": "literal",
+          "value": "Technology"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Jack"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "DataSoft"
+        },
+        "industryName": {
+          "type": "literal",
+          "value": "Software"
+        }
+      }
+    ]
+  }
+}

@@ -90,7 +90,7 @@ void FileManager::read_existing_page(PageId page_id, char* bytes) const {
     struct stat buf;
     fstat(fd, &buf);
     uint64_t file_size = buf.st_size;
-    assert(page_id.page_number < file_size/VPage::SIZE);
+    assert((page_id.page_number == 0 && file_size == 0) || page_id.page_number < file_size/VPage::SIZE);
 #endif
 
     auto read_res = pread(fd, bytes, VPage::SIZE, page_id.page_number*VPage::SIZE);

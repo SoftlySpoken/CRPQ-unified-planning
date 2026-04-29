@@ -1,0 +1,56 @@
+name: Sync to Public Repo
+
+on:
+  push:
+    branches: [ crpq-main ]  # only trigger on this branch
+  # Optional: manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: read  # only allow reading code
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (fetch-only style with minimal impact)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: crpq-main
+          fetch-depth: 0
+          # This ensures auth is set up and 'origin' remote exists
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "SoftlySpoken"
+          git config --global user.email "michelle.py@pku.edu.cn"
+
+      - name: Fetch full history of crpq-main
+        run: |
+          git fetch origin crpq-main
+
+      - name: Squash post-cutoff history
+        run: |
+          # 🔁 Replace with your actual cutoff commit
+          CUT_OFF_COMMIT="6aaaf6f"
+
+          # Hard reset to cutoff, then soft reset to current tip
+          git checkout --no-track -b crpq "$CUT_OFF_COMMIT"
+          git checkout origin/crpq-main -- .
+          git commit -m "Unified CRPQ planning & evaluation"
+
+      - name: Set up SSH for public repo push
+        env:
+          SSH_KEY: ${{ secrets.PUBLIC_REPO_DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Push to public repo
+        run: |
+          git remote add public git@github.com:SoftlySpoken/CRPQ-unified-planning.git
+          git push public crpq --force

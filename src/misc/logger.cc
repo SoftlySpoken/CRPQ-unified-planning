@@ -84,11 +84,28 @@ Logger::Logger() {
         { Category::Debug,          {} },
     };
 
+    // Configure logging based on build type
 #ifdef NDEBUG
-    categories[Category::Debug].enabled = true;
-#else
+    // Release build: Only enable Info, ExecutionStats, and Error categories
+    categories[Category::Query].enabled = false;
+    categories[Category::LogicalPlan].enabled = false;
+    categories[Category::PhysicalPlan].enabled = false;
+    categories[Category::ExecutionStats].enabled = true;
+    categories[Category::Error].enabled = true;
+    categories[Category::Info].enabled = true;
     categories[Category::Debug].enabled = false;
+#else
+    // Debug build: Enable all categories
+    categories[Category::Query].enabled = true;
+    categories[Category::LogicalPlan].enabled = true;
+    categories[Category::PhysicalPlan].enabled = true;
+    categories[Category::ExecutionStats].enabled = true;
+    categories[Category::Error].enabled = true;
+    categories[Category::Info].enabled = true;
+    categories[Category::Debug].enabled = true;
 #endif
+
+    // Error category always uses stderr
     categories[Category::Error].os = &std::cerr;
 }
 

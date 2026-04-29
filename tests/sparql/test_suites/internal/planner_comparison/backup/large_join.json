@@ -1,0 +1,185 @@
+{
+  "head": {
+    "vars": ["personName", "companyName", "cityName", "productName", "categoryName"]
+  },
+  "results": {
+    "bindings": [
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Alice"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "TechCorp"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "New York"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Laptop"
+        },
+        "categoryName": {
+          "type": "literal",
+          "value": "Electronics"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Bob"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "TechCorp"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "San Francisco"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Phone"
+        },
+        "categoryName": {
+          "type": "literal",
+          "value": "Electronics"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Alice"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "TechCorp"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "New York"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Tablet"
+        },
+        "categoryName": {
+          "type": "literal",
+          "value": "Electronics"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Charlie"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "DataSoft"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "New York"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Software License"
+        },
+        "categoryName": {
+          "type": "literal",
+          "value": "Software"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "David"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "DataSoft"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "Austin"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Monitor"
+        },
+        "categoryName": {
+          "type": "literal",
+          "value": "Electronics"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Eve"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "WebSystems"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "San Francisco"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Keyboard"
+        },
+        "categoryName": {
+          "type": "literal",
+          "value": "Electronics"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Frank"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "TechCorp"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "New York"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Mouse"
+        },
+        "categoryName": {
+          "type": "literal",
+          "value": "Electronics"
+        }
+      },
+      {
+        "personName": {
+          "type": "literal",
+          "value": "Grace"
+        },
+        "companyName": {
+          "type": "literal",
+          "value": "DataSoft"
+        },
+        "cityName": {
+          "type": "literal",
+          "value": "San Francisco"
+        },
+        "productName": {
+          "type": "literal",
+          "value": "Database Software"
+        },
+        "categoryName": {
+          "type": "literal",
+          "value": "Software"
+        }
+      }
+    ]
+  }
+}

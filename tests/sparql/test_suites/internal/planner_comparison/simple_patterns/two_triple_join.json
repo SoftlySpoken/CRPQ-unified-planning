@@ -1,0 +1,119 @@
+{
+  "head": {
+    "vars": ["name", "age"]
+  },
+  "results": {
+    "bindings": [
+      {
+        "name": {
+          "type": "literal",
+          "value": "Alice"
+        },
+        "age": {
+          "type": "literal",
+          "value": "25",
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+        }
+      },
+      {
+        "name": {
+          "type": "literal",
+          "value": "Bob"
+        },
+        "age": {
+          "type": "literal",
+          "value": "30",
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+        }
+      },
+      {
+        "name": {
+          "type": "literal",
+          "value": "Charlie"
+        },
+        "age": {
+          "type": "literal",
+          "value": "35",
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+        }
+      },
+      {
+        "name": {
+          "type": "literal",
+          "value": "David"
+        },
+        "age": {
+          "type": "literal",
+          "value": "28",
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+        }
+      },
+      {
+        "name": {
+          "type": "literal",
+          "value": "Eve"
+        },
+        "age": {
+          "type": "literal",
+          "value": "32",
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+        }
+      },
+      {
+        "name": {
+          "type": "literal",
+          "value": "Frank"
+        },
+        "age": {
+          "type": "literal",
+          "value": "45",
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+        }
+      },
+      {
+        "name": {
+          "type": "literal",
+          "value": "Grace"
+        },
+        "age": {
+          "type": "literal",
+          "value": "29",
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+        }
+      },
+      {
+        "name": {
+          "type": "literal",
+          "value": "Henry"
+        },
+        "age": {
+          "type": "literal",
+          "value": "33",
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+        }
+      },
+      {
+        "name": {
+          "type": "literal",
+          "value": "Ivy"
+        },
+        "age": {
+          "type": "literal",
+          "value": "27",
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+        }
+      },
+      {
+        "name": {
+          "type": "literal",
+          "value": "Jack"
+        },
+        "age": {
+          "type": "literal",
+          "value": "31",
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+        }
+      }
+    ]
+  }
+}

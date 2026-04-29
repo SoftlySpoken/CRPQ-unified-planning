@@ -103,3 +103,12 @@ private:
     IdUnion value;
     IdType type;
 };
+
+struct IdHash {
+    std::size_t operator()(const Id& k) const noexcept {
+        if (k.is_OID()) {
+            return std::hash<uint64_t>{}(k.get_OID().id);
+        }
+        return std::hash<uint_fast32_t>{}(k.get_var().id);
+    }
+};

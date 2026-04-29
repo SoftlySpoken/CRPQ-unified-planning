@@ -1,0 +1,1 @@
+python3 correctness_driver.py --queries /mydata/pangyue/WDBench/Queries/c2rpqs-connected-debug-251221.txt --base-timeout 60000 --script-timeout 36000 --output-path ./results --build-type Release --verbose

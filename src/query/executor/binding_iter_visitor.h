@@ -36,6 +36,18 @@ class HashJoinInBuffer;
 class HashJoinInMemory;
 class LeftCrossProduct;
 
+class TwoColumnBindingIter;
+template<std::size_t N> class BPlusTreeTwoColumnBindingIter;
+namespace CustomOps {
+class UnionOperator;
+class SJOperator;
+class TIOperator;
+class TITwoWayOperator;
+class KCOperator;
+class MCOperator;
+class TwoColumnStoreBindingIter;
+}
+
 namespace LSH {
 class ForestIndexTopK;
 class ForestIndexTopAll;
@@ -229,4 +241,15 @@ public:
     virtual void visit(LSH::ForestIndexTopK&) = 0;
     virtual void visit(LSH::ForestIndexTopAll&) = 0;
     virtual void visit(LSH::ProjectTensorSimilarity&) = 0;
+
+    // Custom operators
+    virtual void visit(CustomOps::UnionOperator&) = 0;
+    virtual void visit(CustomOps::SJOperator&) = 0;
+    virtual void visit(CustomOps::TIOperator&) = 0;
+    virtual void visit(CustomOps::TITwoWayOperator&) = 0;
+    virtual void visit(CustomOps::KCOperator&) = 0;
+    virtual void visit(CustomOps::MCOperator&) = 0;
+    virtual void visit(CustomOps::TwoColumnStoreBindingIter&) = 0;
+    virtual void visit(TwoColumnBindingIter&) = 0;
+    virtual void visit(BPlusTreeTwoColumnBindingIter<3>&) = 0;
 };

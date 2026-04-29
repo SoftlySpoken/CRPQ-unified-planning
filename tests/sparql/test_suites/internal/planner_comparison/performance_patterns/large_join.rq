@@ -1,0 +1,14 @@
+PREFIX : <http://example.org/>
+
+SELECT ?personName ?companyName ?cityName ?productName ?categoryName WHERE {
+    ?person :name ?personName ;
+            :worksFor ?company ;
+            :city ?city .
+    ?company :companyName ?companyName .
+    ?city :cityName ?cityName .
+    ?order :customer ?person ;
+           :product ?product .
+    ?product :productName ?productName ;
+             :category ?category .
+    ?category :categoryName ?categoryName .
+}

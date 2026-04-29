@@ -73,6 +73,7 @@ INTERNAL_TESTS: List[str] = [
     "union",
     "print",
     "schemes",
+    "planner_comparison",
     # "service",
 ]
 

@@ -1,0 +1,10 @@
+PREFIX : <http://example.org/>
+
+SELECT ?personName ?companyName ?industryName WHERE {
+    ?person :name ?personName ;
+            :worksFor ?company .
+    ?company :companyName ?companyName .
+    OPTIONAL {
+        ?company :industry ?industryName .
+    }
+}

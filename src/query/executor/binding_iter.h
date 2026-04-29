@@ -10,6 +10,7 @@ class BindingIter {
 protected:
     virtual void _begin(Binding& parent_binding) = 0;
     virtual bool _next() = 0;
+    virtual bool _epsilon_next() { return false; }
     virtual void _reset() = 0;
 
 public:
@@ -46,6 +47,9 @@ public:
         results += static_cast<uint64_t>(result);
         return result;
     }
+
+    inline bool epsilon_next() { return _epsilon_next(); }
+    virtual bool get_epsilon() const { return false; }
 
     // Every var that the iter sets in the binding when next() returns true is set to null
     virtual void assign_nulls() = 0;
